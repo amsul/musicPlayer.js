@@ -1,0 +1,786 @@
+/*
+    Author:            Amsul
+    Author URI:        http://amsul.ca
+    Description:       Main stylesheet
+    Version:           0.1.0
+    Created on:        13/09/2012
+    Last Updated:      16 September, 2012
+*/
+
+
+
+
+/*
+    HTML5 element display (old browsers)
+======================================================================== */
+
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section, summary { display: block; }
+audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+audio:not([controls]) { display: none; height: 0; }
+[hidden] { display: none; }
+
+
+
+/*
+    Base
+======================================================================== */
+
+html { font-size: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+html, button, input, select, textarea { font-family: sans-serif; font-weight: 200; color: #222; }
+
+body { margin: 0; }
+
+
+::-moz-selection    { background: #b3d4fc; text-shadow: none; }
+::selection         { background: #b3d4fc; text-shadow: none; }
+
+
+
+
+/*
+    Links
+======================================================================== */
+
+a:hover,
+a:active {
+    outline: 0;
+}
+
+a:focus { outline: thin dotted; }
+
+
+
+
+/*
+    Typography
+======================================================================== */
+
+h1 {
+    font-size: 2em;
+    margin: .67em 0;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: .83em 0;
+}
+
+h3 {
+    font-size: 1.17em;
+    margin: 1em 0;
+}
+
+h4 {
+    font-size: 1em;
+    margin: 1.33em 0;
+}
+
+h5 {
+    font-size: .83em;
+    margin: 1.67em 0;
+}
+
+h6 {
+    font-size: .75em;
+    margin: 2.33em 0;
+}
+
+
+p, div {
+    -ms-word-break: break-all;
+        word-break: break-all;
+        word-break: break-word; /* old webkit */
+}
+
+abbr[title] { border-bottom: 1px dotted; }
+
+b, strong { font-weight: bold; }
+
+blockquote { margin: 1em 40px; }
+
+dfn { font-style: italic; }
+
+mark { background: #ff0; color: #000; }
+
+p, pre { margin: 1em 0; }
+
+pre, code, kbd, samp { font-family: monospace, serif; _font-family: 'Courier New', monospace; font-size: 1em; }
+
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
+
+q { quotes: none; }
+q:before, q:after { content: ""; content: none; }
+
+small { font-size: 80%; }
+
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+sup { top: -.5em; }
+sub { bottom: -.25em; }
+
+
+
+
+/*
+    Lists
+======================================================================== */
+
+dl, menu, ol, ul { margin: 1em 0; }
+
+dd { margin: 0 0 0 40px; }
+
+menu, ol, ul { padding: 0 0 0 40px; }
+
+nav ul,
+nav ol {
+    list-style: none;
+    list-style-image: none;
+}
+
+
+
+
+/*
+    Embedded content
+======================================================================== */
+
+object, embed, img { max-width: 100%; }
+
+img { border: 0; -ms-interpolation-mode: bicubic; }
+
+svg:not(:root) { overflow: hidden; }
+
+
+
+/*
+    Figures
+======================================================================== */
+
+figure { margin: 0; }
+
+
+
+
+/*
+    Forms
+======================================================================== */
+
+form { margin: 0; }
+
+fieldset {
+    border: 1px solid #c0c0c0;
+    margin: 0 2px;
+    padding: .35em .625em .75em;
+}
+
+legend { border: 0; padding: 0; white-space: normal; *margin-left: -7px; }
+
+label:hover { cursor: default; }
+
+
+button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+
+button,
+html input[type=button],
+input[type=reset],
+input[type=submit] {
+    -webkit-appearance: button;
+    cursor: pointer;
+    *overflow: visible;
+}
+
+button[disabled], input[disabled] { cursor: default; }
+
+button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+
+input[type=checkbox], input[type=radio] {
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 0;
+    *height: 13px;
+    *width: 13px;
+}
+
+input[type=search] {
+    -webkit-appearance: textfield;
+    -webkit-box-sizing: content-box;
+       -moz-box-sizing: content-box;
+            box-sizing: content-box;
+}
+
+textarea { overflow: auto; vertical-align: top; resize: vertical; }
+
+
+
+
+/*
+    Tables
+======================================================================== */
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+    ========================================================================
+    ========================================================================
+    ========================================================================
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================================
+
+    Primary styling
+
+======================================================================== */
+
+
+
+/*
+    Base
+======================================================================== */
+
+body {
+    font-size: 1.1em;
+    line-height: 1.4;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+img {
+    vertical-align: middle;
+    height: auto;
+    max-width: 100%;
+}
+
+a {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: bold;
+    line-height: 1;
+}
+
+h1:first-child,
+h2:first-child,
+h3:first-child,
+h4:first-child,
+h5:first-child,
+h6:first-child,
+p:first-child {
+    margin-top: .33em;
+}
+
+
+
+code {
+    background: #f2f2f2;
+    font-size: 90%;
+    padding: 4px 9px;
+
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+}
+
+
+
+
+
+
+/*
+    Lists
+======================================================================== */
+
+ul:not(.plain) li {
+    margin-bottom: 5px;
+}
+
+
+
+
+/*
+    Figures
+======================================================================== */
+
+figcaption {
+    line-height: 1.5;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+
+
+
+
+/*
+    Form elements
+======================================================================== */
+
+fieldset {
+    border: 0;
+    margin: 0 0 14px;
+    padding: 0;
+}
+
+
+input[type=checkbox],
+input[type=radio] {
+    margin-right: 5px;
+}
+
+
+/** Labels **/
+
+legend {
+
+}
+
+.label {
+    font-weight: bold;
+}
+
+
+/** Fieldset types **/
+
+/* for form events */
+.field-warning {
+    color: #e20;
+    font-weight: bold;
+}
+.field-success {
+    color: #3a0;
+    font-weight: bold;
+}
+
+
+
+/** User input fields **/
+
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=search],
+textarea {
+    border: 1px solid #999;
+    padding: 5px;
+    width: 220px;
+
+    -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.1), 0 1px 1px #fff;
+       -moz-box-shadow: inset 0 1px 2px rgba(0,0,0,.1), 0 1px 1px #fff;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,.1), 0 1px 1px #fff;
+
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+}
+
+/** Full width input **/
+.field-wrap {
+    padding-right: 12px;
+}
+.field-wrap input[type=text],
+.field-wrap input[type=password],
+.field-wrap input[type=email],
+.field-wrap input[type=search] {
+    width: 100%;
+    margin-right: 0;
+}
+
+
+
+textarea {
+    min-height: 48px;
+}
+
+input[type=text]:hover,
+input[type=password]:hover,
+input[type=email]:hover,
+input[type=search]:hover,
+textarea:hover {
+
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus,
+input[type=search]:focus,
+textarea:focus {
+
+}
+
+
+/** Select and search **/
+
+select {
+    border: 1px solid #999;
+    background-color: #fff;
+    padding: 3px 5px;
+    height: 29px;
+    white-space: nowrap;
+}
+
+input[type=search] {
+    padding-left: 0;
+    padding-right: 0;
+
+    -webkit-border-radius: 14px;
+       -moz-border-radius: 14px;
+            border-radius: 14px;
+}
+
+select,
+input[type=search] {
+
+}
+
+input[type=search] + input[type=submit],
+input[type=search] + button {
+
+}
+
+
+
+
+
+
+/*
+    Tables
+======================================================================== */
+
+table {
+    line-height: 1.5;
+    background: #fff;
+    border: 1px solid #ccc;
+
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+}
+
+th,
+td {
+    vertical-align: top;
+    padding: 6px 12px;
+    border-top: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+}
+th:last-child,
+td:last-child {
+    border-right: 0;
+}
+
+thead th {
+    background: #f5f5f5;
+    border-top: 0;
+}
+thead th:first-child {
+    -webkit-border-radius: 5px 0 0 0;
+       -moz-border-radius: 5px 0 0 0;
+            border-radius: 5px 0 0 0;
+}
+thead th:last-child {
+    -webkit-border-radius: 0 5px 0 0;
+       -moz-border-radius: 0 5px 0 0;
+            border-radius: 0 5px 0 0;
+}
+
+tbody th,
+tbody td {
+    font-size: 12px;
+}
+
+tbody tr:nth-child(even) th,
+tbody tr:nth-child(even) td {
+    background-color: #f9f9f9;
+}
+
+tbody tr:last-child th:first-child,
+tbody tr:last-child td:first-child {
+    -webkit-border-radius: 0 0 0 5px;
+       -moz-border-radius: 0 0 0 5px;
+            border-radius: 0 0 0 5px;
+}
+
+tbody tr:last-child th:last-child,
+tbody tr:last-child td:last-child {
+    -webkit-border-radius: 0 0 5px 0;
+       -moz-border-radius: 0 0 5px 0;
+            border-radius: 0 0 5px 0;
+}
+
+
+
+
+
+
+
+/*
+    Buttons
+======================================================================== */
+
+button, input {
+    margin-right: 6px;
+}
+
+button,
+input[type=button],
+input[type=reset],
+input[type=submit],
+.button,
+a.button {
+
+}
+
+button,
+input[type=button],
+input[type=submit] {
+
+}
+
+button:hover,
+input[type=button]:hover,
+input[type=reset]:hover,
+input[type=submit]:hover,
+.button:hover,
+a.button:hover {
+    /*text-decoration: none;*/
+}
+
+a.button:focus {
+    /*outline: none;*/
+}
+
+button:active,
+input[type=button]:active,
+input[type=reset]:active,
+input[type=submit]:active,
+.button:active,
+a.button:active {
+
+}
+
+
+
+
+
+
+
+
+/*
+    App structure
+======================================================================== */
+
+body {
+    padding: 40px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+    ========================================================================
+    ========================================================================
+    ========================================================================
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================================
+
+    Media Queries
+
+======================================================================== */
+
+
+@media (max-width: 880px) {
+
+    .frame-left {
+        right: 0;
+        bottom: 50%;
+    }
+
+    .frame-right {
+        left: 0;
+        top: 50%;
+    }
+
+
+} /* >= 720px */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+    Non-semantic helper classes
+======================================================================== */
+
+.dimmed, a.dimmed { color: #bcbcbc; }
+
+.warning { color: red; }
+
+
+.hidden { display: none; visibility: hidden; }
+.invisible { visibility: hidden; }
+
+
+.alignleft { float: left; }
+.alignright { float: right; }
+
+
+.clear:before, .clear:after { content: " "; display: table; }
+.clear:after { clear: both; }
+.clear { *zoom: 1; }
+
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    *text-indent: -9999px;
+}
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 100%;
+}
+
+
+
+
+
+
+
+
+/*
+    No js
+======================================================================== */
+
+.no-js #NOSCRIPT {
+    display: block;
+}
+
+#NOSCRIPT {
+    background: #e20;
+    color: #fff;
+    padding: 10px;
+    display: none;
+}
+#NOSCRIPT p {
+    margin: 0;
+}
+#NOSCRIPT a {
+    color: #fff;
+}
+
+
+
+
+
+
+
+
+/*
+    Print media queries
+======================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow:none !important;
+        text-shadow: none !important;
+    }
+    a, a:visited { text-decoration: underline; }
+    a[href]:after { content: " (" attr(href) ")"; }
+    abbr[title]:after { content: " (" attr(title) ")"; }
+    .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }
+    pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+    thead { display: table-header-group; }
+    tr, img { page-break-inside: avoid; }
+    img { max-width: 100% !important; }
+    @page { margin: 0.5cm; }
+    p, h2, h3 { orphans: 3; widows: 3; }
+    h2, h3 { page-break-after: avoid; }
+}
+
+
