@@ -1,10 +1,12 @@
 /*!
-    Author:         Amsul
-    Author URI:     http://amsul.ca
-    Description:    Main scripts
-    Version:        0.3.0
-    Created on:     13/09/2012
-    Last Updated:   19 September, 2012
+    musicPlayer.js v0.3.0
+    By Amsul (http://amsul.ca)
+
+    Updated: 20 September, 2012
+
+    (c) Amsul Naeem, 2012 - http://amsul.ca
+    Licensed under MIT ("expat" flavour) license.
+    Hosted on http://github.com/amsul/slideshow
 */
 /*jshint browser: true, devel: true, debug: true */
 
@@ -16,505 +18,286 @@
     'use strict';
 
 
-    var
+    var MusicPlayer = function( playlist, options ) {
 
-        /*
-            Globals
-        ======================================================================== */
+        var
 
-        // classes
-        CLASSNAME_PLAYER = 'music-player',
-        CLASSNAME_PLAYLIST = 'music-playlist',
-        CLASSNAME_CONTROLS = 'controls-player',
-        CLASSNAME_CONTROLS_PLAY = 'control-play',
-        CLASSNAME_CONTROLS_PAUSE = 'control-pause',
-        CLASSNAME_SEEKBAR_BAR = 'seekbar-bar',
-        CLASSNAME_SEEKBAR_PROGRESS = 'seekbar-progress',
-        CLASSNAME_SEEKBAR_POINTER = 'seekbar-pointer',
-        CLASSNAME_TIMESTAMPS_START = 'timestamp-start',
-        CLASSNAME_TIMESTAMPS_END = 'timestamp-end',
-        CLASSNAME_WRAPPER_AUDIO = 'wrapper-audio',
-        CLASSNAME_WRAPPER_PLAYER = 'wrapper-player',
-        CLASSNAME_WRAPPER_CONTROLS = 'wrapper-controls',
-        CLASSNAME_WRAPPER_SEEKBAR = 'wrapper-seekbar',
-        CLASSNAME_WRAPPER_TIMESTAMPS = 'wrapper-timestamps',
+            /*
+                Globals
+            ======================================================================== */
 
-        // strings
-        STRING_PLAY = 'Play',
-        STRING_PAUSE = 'Pause',
-        STRING_REWIND = 'Rewind',
-        STRING_FORWARD = 'Forward',
-        STRING_TIME_CURRENT = 'Current time',
-        STRING_TIME_TOTAL = 'Total duration',
-
-        // numbers
-        NUMBER_TIME_CURRENT = 0,
-        NUMBER_TIME_TOTAL = 0,
+            // options
+            OPTIONS = $.extend( {}, $.fn.musicPlayer.options, options ),
 
 
+            // elements
+            $PLAYLIST = $( playlist ),
 
 
-        /*
-            PLAYER
-        ======================================================================== */
+            // classes
+            CLASSNAME_CONTROLS = OPTIONS.classControls,
+            CLASSNAME_CONTROLS_PLAY = OPTIONS.classControlsPlay,
+            CLASSNAME_CONTROLS_PAUSE = OPTIONS.classControlsPause,
+            CLASSNAME_CONTROLS_REWIND = OPTIONS.classControlsRewind,
+            CLASSNAME_CONTROLS_FORWARD = OPTIONS.classControlsForward,
 
-        PLAYER = function( playlists ) {
+            CLASSNAME_SEEKBAR_BAR = OPTIONS.classSeekbar,
+            CLASSNAME_SEEKBAR_PROGRESS = OPTIONS.classSeekbarProgress,
+            CLASSNAME_SEEKBAR_POINTER = OPTIONS.classSeekbarPointer,
+
+            CLASSNAME_TIMESTAMPS_START = OPTIONS.classTimestampStart,
+            CLASSNAME_TIMESTAMPS_END = OPTIONS.classTimestampEnd,
+
+            CLASSNAME_WRAPPER_AUDIO = OPTIONS.classAudioWrapper,
+            CLASSNAME_WRAPPER_PLAYER = OPTIONS.classPlayerWrapper,
+            CLASSNAME_WRAPPER_CONTROLS = OPTIONS.classControlsWrapper,
+            CLASSNAME_WRAPPER_SEEKBAR = OPTIONS.classSeekbarWrapper,
+            CLASSNAME_WRAPPER_TIMESTAMPS = OPTIONS.classTimestampWrapper,
+
+
+            // strings
+            STRING_PLAY = OPTIONS.stringPlay,
+            STRING_PAUSE = OPTIONS.stringPause,
+            STRING_REWIND = OPTIONS.stringRewind,
+            STRING_FORWARD = OPTIONS.stringForward,
+
+            STRING_TIME_CURRENT = 'Current time',
+            STRING_TIME_TOTAL = 'Total duration',
+
+
+            // numbers
+            NUMBER_TIME_CURRENT = 0,
+            NUMBER_TIME_TOTAL = 0,
+
+
 
             /*
                 Private methods
             ======================================================================== */
 
-            var _self = {
+            _player = {
 
 
                 /*
                     Initialize the player
                 ======================================================================== */
 
-                init: function( playlists ) {
+                init: function() {
 
                     var
-
-                        // create a wrapper for the fragment
-                        wrapper = _self.createPlayerWrapper(),
-
-                        // create a document fragment
-                        docfrag = document.createDocumentFragment(),
+                        // create a wrapper for the player
+                        $wrapper = $( '<div class="' + CLASSNAME_WRAPPER_PLAYER + '" />' ),
 
                         // create an audio player
-                        playerAudio = _self.createPlayerAudio(),
+                        $wrappedAudio = _player.createAudio(),
 
-                        // create the player controls
-                        playerControls = _self.createPlayerControls(),
+                        // create player controls
+                        $wrappedControls = _player.createControls(),
 
-                        // create the seek bar
-                        playerSeeker = _self.createSeeker(),
+                        // create player seeker
+                        $wrapperSeeker = _player.createSeeker(),
 
-                        // create time stamps
-                        playerTimestamps = _self.createPlayerTimestamps()
-
-
-                    // put stuff in the document fragment
-                    docfrag.appendChild( playerAudio )
-                    docfrag.appendChild( playerControls )
-                    docfrag.appendChild( playerSeeker )
-                    docfrag.appendChild( playerTimestamps )
+                        // create the time stamps
+                        $wrappedTimestamps = _player.createTimestamps()
 
 
-                    // go through all the playlists and bind events
-                    for ( var i = 0; i < playlists.length; i += 1 ) {
-                        _self.bindEvents( playlists[ i ] )
-                    }
+                    // add the stuff to the wrapper
+                    $wrapper.append( $wrappedAudio, $wrappedControls, $wrapperSeeker, $wrappedTimestamps )
 
 
-                    // put into the wrapper
-                    wrapper.appendChild( docfrag )
+                    // do stuff with the playlist
+                    $PLAYLIST.
 
+                        // put the player in the dom
+                        after( $wrapper ).
 
+                        // query the songs
+                        find( '[data-song]' ).on( 'click', _player.onClickSong )
 
-                    // put stuff into the dom
-                    document.body.appendChild( wrapper )
-
-
-                    return playerAudio
                 }, //init
 
 
+
                 /*
-                    Create a wrapper for the player
+                    Create a player audio
                 ======================================================================== */
 
-                createPlayerWrapper: function() {
+                createAudio: function() {
 
-                    // create the div
-                    _self.audioWrapper = document.createElement( 'div' )
+                    // create the audio player
+                    _player.$playerAudio        =       $( '<audio controls />' ).
 
-                    // add the class
-                    _self.audioWrapper.className = CLASSNAME_WRAPPER_PLAYER
+                                                            // bind the events
+                                                            on({
+                                                                playing: _player.onPlaying,
+                                                                pause: _player.onPause,
+                                                                timeupdate: _player.onTimeupdate,
+                                                                loadedmetadata: _player.onLoadedmetadata,
+                                                                ended: _player.onEnded,
+                                                                error: _player.onError
+                                                            }).
 
-                    return _self.audioWrapper
-                },
+                                                            // add the source
+                                                            html( '<source type="audio/mp3" />' ).
+
+                                                            // wrap the audio player
+                                                            wrap( '<div class="' + CLASSNAME_WRAPPER_AUDIO + '" style="display:none">' )
+
+                    return _player.$playerAudio.parent()
+                }, //createAudio
 
 
                 /*
-                    Create an audio player
+                    Create player controls
                 ======================================================================== */
 
-                createPlayerAudio: function() {
+                createControls: function() {
 
-                    var
-                        // create an audio source
-                        source = (function() {
-                            _self.audioPlayerSource = document.createElement( 'source' )
+                    // create the play button
+                    _player.$playerPlay         =       $( '<a data-control="play" class="' + CLASSNAME_CONTROLS_PLAY + '">' + STRING_PLAY + '</a>' ).
+                                                            on( 'click', _player.onClickControl )
 
-                            // set the source type
-                            _self.audioPlayerSource.type = 'audio/mp3'
+                    // create the pause button
+                    _player.$playerPause        =       $( '<a data-control="pause" class="' + CLASSNAME_CONTROLS_PAUSE + '" style="display:none">' + STRING_PAUSE + '</a>' ).
+                                                            on( 'click', _player.onClickControl )
 
-                            return _self.audioPlayerSource
-                        })(),
+                    // create the rewind button
+                    _player.$playerRewind       =       $( '<a data-control="rewind" class="' + CLASSNAME_CONTROLS_REWIND + '" style="color:red">' + STRING_REWIND + '</a>' ).
+                                                            on( 'click', _player.onClickControl )
 
-                        // create an audio player
-                        audio = (function() {
-                            _self.audioPlayer = document.createElement( 'audio' )
+                    // create the forward button
+                    _player.$playerForward      =       $( '<a data-control="forward" class="' + CLASSNAME_CONTROLS_FORWARD + '" style="color:red">' + STRING_FORWARD + '</a>' ).
+                                                            on( 'click', _player.onClickControl )
 
-                            // set controls to true
-                            _self.audioPlayer.controls = true
+                    // create the controls wrapper
+                    _player.$playerControls     =       $( '<div class="' + CLASSNAME_WRAPPER_CONTROLS + '" />' ).
+                                                            append( _player.$playerPlay, _player.$playerPause, _player.$playerRewind, _player.$playerForward )
 
-                            // append the source to the audio
-                            _self.audioPlayer.appendChild( source )
-
-                            return _self.audioPlayer
-                        })(),
-
-                        // create a wrapper div
-                        wrapper = (function() {
-                            _self.audioWrapper = document.createElement( 'div' )
-
-                            // prepare the wrapper
-                            _self.audioWrapper.className = CLASSNAME_WRAPPER_AUDIO
-
-                            // hide the wrapper
-                            _self.audioWrapper.style.display = 'none'
-
-                            // append the audio to the wrapper
-                            _self.audioWrapper.appendChild( audio )
-
-                            return _self.audioWrapper
-                        })()
-
-
-                    return wrapper
-                }, //createPlayerAudio
+                    return _player.$playerControls
+                }, //createControls
 
 
                 /*
-                    Create a pseudo player
-                ======================================================================== */
-
-                createPlayerControls: function() {
-
-                    var
-                        // create a play button
-                        play = (function() {
-
-                            _self.playerPlay = document.createElement( 'a' )
-
-                            _self.playerPlay.textContent = STRING_PLAY
-
-                            _self.playerPlay.className = CLASSNAME_CONTROLS_PLAY
-
-                            _self.playerPlay.dataset.control = 'play'
-
-                            _self.playerPlay.addEventListener( 'click', function( event ) {
-
-                                event.preventDefault()
-
-                                _self.playOrPause( event.target )
-
-                            }, false )
-
-                            return _self.playerPlay
-                        })(),
-
-                        // create a pause button
-                        pause = (function() {
-
-                            _self.playerPause = document.createElement( 'a' )
-
-                            _self.playerPause.textContent = STRING_PAUSE
-
-                            _self.playerPause.className = CLASSNAME_CONTROLS_PAUSE
-
-                            _self.playerPause.dataset.control = 'pause'
-
-                            _self.playerPause.style.display = 'none'
-
-                            _self.playerPause.addEventListener( 'click', function( event ) {
-
-                                event.preventDefault()
-
-                                _self.playOrPause( event.target )
-
-                            }, false )
-
-                            return _self.playerPause
-                        })(),
-
-                        // create a rewind button
-                        rewind = (function() {
-
-                            _self.playerRewind = document.createElement( 'a' )
-
-                            _self.playerRewind.textContent = STRING_REWIND
-
-                            _self.playerRewind.dataset.control = 'rewind'
-
-                            _self.playerRewind.style.color = 'red'
-
-                            _self.playerRewind.addEventListener( 'click', function( event ) {
-
-                                event.preventDefault()
-
-                                _self.playOrPause( event.target )
-
-                            }, false )
-
-                            return _self.playerRewind
-                        })(),
-
-                        // create a forward button
-                        forward = (function() {
-
-                            _self.playerForward = document.createElement( 'a' )
-
-                            _self.playerForward.textContent = STRING_FORWARD
-
-                            _self.playerForward.dataset.control = 'forward'
-
-                            _self.playerForward.style.color = 'red'
-
-                            _self.playerForward.addEventListener( 'click', function( event ) {
-
-                                event.preventDefault()
-
-                                _self.playOrPause( event.target )
-
-                            }, false )
-
-                            return _self.playerForward
-                        })(),
-
-                        // create a wrapper div
-                        wrapper = (function() {
-
-                            _self.playerWrapper = document.createElement( 'div' )
-
-                            // prepare the wrapper
-                            _self.playerWrapper.className = CLASSNAME_WRAPPER_CONTROLS
-
-                            // append the controls to the wrapper
-                            _self.playerWrapper.appendChild( play )
-                            _self.playerWrapper.appendChild( pause )
-                            _self.playerWrapper.appendChild( rewind )
-                            _self.playerWrapper.appendChild( forward )
-
-                            return _self.playerWrapper
-                        })()
-
-                    return wrapper
-                }, //createPlayerControls
-
-
-                /*
-                    Create an audio seek bar
+                    Create audio seek bar
                 ======================================================================== */
 
                 createSeeker: function() {
 
-                    var
-                        // create the seekbar
-                        seekbar = (function() {
+                    // create the seekbar
+                    _player.$playerSeekbar          =       $( '<a class="' + CLASSNAME_SEEKBAR_BAR + '" style="display:block;height:20px;background:lightgrey"></a>' ).
+                                                                on( 'click', _player.onClickSeekbar )
 
-                            // create the element
-                            _self.playerSeekbar = document.createElement( 'a' )
+                    // create the seekbar progress
+                    _player.$playerSeekbarProgress  =       $( '<a class="' + CLASSNAME_SEEKBAR_PROGRESS + '" style="position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0;background:red"></a>' ).
+                                                                on( 'click', _player.onClickSeekbarProgress )
 
-                            // add the class name
-                            _self.playerSeekbar.className = CLASSNAME_SEEKBAR_BAR
+                    // create the seekbar wrapper
+                    _player.$playerSeekbarWrapper   =       $( '<div class="' + CLASSNAME_WRAPPER_SEEKBAR + '" style="position:relative" />' ).
+                                                                append( _player.$playerSeekbar, _player.$playerSeekbarProgress )
 
-                            // give it a display block
-                            _self.playerSeekbar.style.display = 'block'
-
-                            // give it a height
-                            _self.playerSeekbar.style.height = '20px'
-
-                            // give it a background
-                            _self.playerSeekbar.style.background = 'lightgrey'
-
-                            return _self.playerSeekbar
-                        })(),
-
-                        // create the progress bar
-                        progressbar = (function() {
-
-                            // create the element
-                            _self.playerSeekbarProgress = document.createElement( 'a' )
-
-                            // add the class name
-                            _self.playerSeekbarProgress.className = CLASSNAME_SEEKBAR_PROGRESS
-
-                            // position it absolutely
-                            _self.playerSeekbarProgress.style.position = 'absolute'
-                            _self.playerSeekbarProgress.style.zIndex = 10
-                            _self.playerSeekbarProgress.style.left = 0
-                            _self.playerSeekbarProgress.style.top = 0
-                            _self.playerSeekbarProgress.style.right = '100%'
-                            _self.playerSeekbarProgress.style.bottom = 0
-                            _self.playerSeekbarProgress.style.background = 'red'
-
-                            return _self.playerSeekbarProgress
-                        })(),
-
-                        // create a wrapper div
-                        wrapper = (function() {
-
-                            // create the element
-                            _self.playerSeekbarWrapper = document.createElement( 'div' )
-
-                            // prepare the wrapper
-                            _self.playerSeekbarWrapper.className = CLASSNAME_WRAPPER_SEEKBAR
-
-                            // position it relatively
-                            _self.playerSeekbarWrapper.style.position = 'relative'
-
-                            // append the controls
-                            _self.playerSeekbarWrapper.appendChild( seekbar )
-                            _self.playerSeekbarWrapper.appendChild( progressbar )
-
-                            return _self.playerSeekbarWrapper
-                        })()
+                    return _player.$playerSeekbarWrapper
+                }, //createSeeker
 
 
-                    // update the progress bar on update
-                    _self.audioPlayer.addEventListener( 'timeupdate', function( event ) {
-                        _self.setTimestampStart( _self.audioPlayer.currentTime )
-                        _self.playerSeekbarProgress.style.width = event.target.currentTime / event.target.duration * 100 + '%'
-                    }, false )
+                /*
+                    Create the time stamps
+                ======================================================================== */
 
-                    // update the status when a song starts
-                    _self.audioPlayer.addEventListener( 'loadeddata', function( event ) {
-                        _self.setTimestampStart( _self.audioPlayer.currentTime )
-                        _self.setTimestampEnd( _self.audioPlayer.duration )
-                    }, false )
+                createTimestamps: function() {
+
+                    // create the start stamp
+                    _player.$playerTimestampsStart   =      $( '<div class="' + CLASSNAME_TIMESTAMPS_START + '" />' )
+
+                    // create the end stamp
+                    _player.$playerTimestampsEnd     =      $( '<div class="' + CLASSNAME_TIMESTAMPS_END + '" />' )
+
+                    // create the timestamp wrapper
+                    _player.$playerTimestampsWrapper =      $( '<div class="' + CLASSNAME_WRAPPER_TIMESTAMPS + '" />' ).
+                                                                append( _player.$playerTimestampsStart, _player.$playerTimestampsEnd )
+
+
+                    // set the current time
+                    _player.setTimestampStart( NUMBER_TIME_CURRENT )
+
+                    // set the total time
+                    _player.setTimestampEnd( NUMBER_TIME_TOTAL )
+
+
+                    return _player.$playerTimestampsWrapper
+                }, //createTimestamps
+
+
+
+
+                /*
+                    Fire the audio player events
+                ======================================================================== */
+
+                onPlaying: function( event ) {
+
+                    // hide the play button
+                    _player.$playerPlay.hide()
+
+                    // show the pause button
+                    _player.$playerPause.show()
+
+                    // enable rewind and foward
+                    _player.$playerRewind.css( 'color', '' )
+                    _player.$playerForward.css( 'color', '' )
+
+                    // trigger a seekbar time update
+                    //.........?
+                },
+
+                onPause: function( event ) {
+
+                    // hide the pause button
+                    _player.$playerPause.hide()
+
+                    // show the play button
+                    _player.$playerPlay.show()
+                },
+
+                onTimeupdate: function( event ) {
+
+                    // update the start timestamp
+                    _player.setTimestampStart( event.target.currentTime )
+
+                    // update the seekbar progress
+                    _player.$playerSeekbarProgress.css( 'width', event.target.currentTime / event.target.duration * 100 + '%' )
+                },
+
+                onLoadedmetadata: function( event ) {
+
+                    // update the status when a song is ready
+                    _player.setTimestampStart( event.target.currentTime )
+                    _player.setTimestampEnd( event.target.duration )
+                },
+
+                onEnded: function( event ) {
 
                     // update the status when a song ends
-                    _self.audioPlayer.addEventListener( 'ended', function( event ) {
-                        console.log( 'song ended', event )
-                    }, false )
+                    console.log( 'song ended', event )
+                },
 
-                    return wrapper
+                onError: function( event ) {
+
+                    // notify when there is an error
+                    console.log( 'there was an error loading the song', event )
                 },
 
 
                 /*
-                    Create the player time stampes
+                    Fire the seekbar events
                 ======================================================================== */
 
-                createPlayerTimestamps: function() {
-
-                    var
-                        // create the start stamp
-                        stampstart = (function() {
-
-                            // create the element
-                            _self.playerTimestampsStart = document.createElement( 'div' )
-
-                            // prepare the div
-                            _self.playerTimestampsStart.className = CLASSNAME_TIMESTAMPS_START
-
-                            // insert the label
-                            //_self.playerTimestampsStart.innerHTML = STRING_TIME_CURRENT
-
-                            // insert the current time
-                            _self.setTimestampStart( NUMBER_TIME_CURRENT )
-
-                            return _self.playerTimestampsStart
-                        })(),
-
-                        // create the end stamp
-                        stampend = (function() {
-
-                            // create the element
-                            _self.playerTimestampsEnd = document.createElement( 'div' )
-
-                            // prepare the div
-                            _self.playerTimestampsEnd.className = CLASSNAME_TIMESTAMPS_START
-
-                            // insert the label
-                            //_self.playerTimestampsEnd.innerHTML = STRING_TIME_TOTAL
-
-                            // insert the total time
-                            _self.setTimestampEnd( NUMBER_TIME_TOTAL )
-
-                            return _self.playerTimestampsEnd
-                        })(),
-
-                        // create a wrapper div
-                        wrapper = (function() {
-
-                            // create the element
-                            _self.playerTimestampsWrapper = document.createElement( 'div' )
-
-                            // prepare the wrapper
-                            _self.playerTimestampsWrapper.className = CLASSNAME_WRAPPER_TIMESTAMPS
-
-                            // append the timestamps to the wrapper
-                            _self.playerTimestampsWrapper.appendChild( stampstart )
-                            _self.playerTimestampsWrapper.appendChild( stampend )
-
-                            return _self.playerTimestampsWrapper
-                        })()
-
-
-                    return wrapper
+                onClickSeekbar: function( event ) {
+                    _player.$playerAudio[ 0 ].currentTime = event.offsetX / _player.$playerSeekbar[ 0 ].offsetWidth * _player.$playerAudio[ 0 ].duration
                 },
 
-
-                /*
-                    Bind events to a playlist
-                ======================================================================== */
-
-                bindEvents: function( playlist ) {
-
-                    var
-                        // find all the songs
-                        songs = playlist.querySelectorAll( '[data-song]' )
-
-                    // bind click events to the songs
-                    _self.onClickEvents( songs )
-
-                    return _self
-                }, //bindEvents
-
-
-                /*
-                    Bind click events to the songs
-                ======================================================================== */
-
-                onClickEvents: function( songs ) {
-
-                    var song,
-                        songsCount = songs.length,
-
-                        // on click, play the song
-                        onClick = function( e ) {
-                            e.preventDefault()
-                            _self.play( e.target.getAttribute( 'data-song' ) )
-                        }
-
-                    // bind the click on each song
-                    for ( var i = 0; i < songsCount; i += 1 ) {
-                        songs[ i ].onclick = onClick
-                    }
-
-                    return _self
-                }, //onClickEvents
-
-
-                /*
-                    Bind click events to the seekbar
-                ======================================================================== */
-
-                onClickSeekbar: function() {
-
-                    _self.playerSeekbar.addEventListener( 'click', function( event ) {
-                        _self.audioPlayer.currentTime = event.offsetX / _self.playerSeekbar.offsetWidth * _self.audioPlayer.duration
-                    }, false )
-
-                    _self.playerSeekbarProgress.addEventListener( 'click', function( event ) {
-                        _self.audioPlayer.currentTime = event.offsetX / _self.playerSeekbar.offsetWidth * _self.audioPlayer.duration
-                    }, false )
-
-                }, //onClickSeekbar
+                onClickSeekbarProgress: function( event ) {
+                    _player.$playerAudio[ 0 ].currentTime = event.offsetX / _player.$playerSeekbar[ 0 ].offsetWidth * _player.$playerAudio[ 0 ].duration
+                },
 
 
                 /*
@@ -529,9 +312,10 @@
                     // pad the seconds if needed
                     if ( seconds < 10 ) { seconds = '0' + seconds }
 
-                    _self.playerTimestampsStart.textContent = minutes + ':' + seconds
+                    // set the text
+                    _player.$playerTimestampsStart.text( minutes + ':' + seconds )
 
-                    return _self
+                    return _player
                 },
 
                 setTimestampEnd: function( time ) {
@@ -542,9 +326,58 @@
                     // pad the seconds if needed
                     if ( seconds < 10 ) { seconds = '0' + seconds }
 
-                    _self.playerTimestampsEnd.textContent =  minutes + ':' + seconds
+                    // set the text
+                    _player.$playerTimestampsEnd.text( minutes + ':' + seconds )
 
-                    return _self
+                    return _player
+                },
+
+
+                /*
+                    Handle the player control events
+                ======================================================================== */
+
+                onClickControl: function( event ) {
+
+                    // prevent the default
+                    event.preventDefault()
+
+                    // do the controller action
+                    _player.doControl( event.target )
+                },
+
+
+                /*
+                    Fire the click control events
+                ======================================================================== */
+
+                doControl: function( button ) {
+
+                    var action = button.dataset.control
+
+                    // if the action is a function
+                    if ( typeof _player[ action ] === 'function' ) {
+
+                        // do the action
+                        _player[ action ]()
+                    }
+
+                    return _player
+                },
+
+
+
+                /*
+                    Click events on a song
+                ======================================================================== */
+
+                onClickSong: function( event ) {
+
+                    // prevent the default event action
+                    event.preventDefault()
+
+                    // play the song
+                    _player.play( event.target.dataset.song )
                 },
 
 
@@ -554,36 +387,20 @@
 
                 play: function( source ) {
 
+                    // if there's a source
                     if ( source ) {
 
                         console.log( source )
 
                         // set the source
-                        _self.audioPlayer.src = source
-
-                        debugger
+                        _player.$playerAudio[ 0 ].src = source
                     }
 
-                    // play the song
-                    _self.audioPlayer.play()
+                    // play the source or resume the song
+                    _player.$playerAudio[ 0 ].play()
 
-                    // hide the play button
-                    _self.playerPlay.style.display = 'none'
-
-                    // show the pause button
-                    _self.playerPause.style.display = ''
-
-                    // enable rewind and forward
-                    _self.playerRewind.style.color = ''
-                    _self.playerForward.style.color = ''
-
-
-                    // bind the seekbar click event
-                    _self.onClickSeekbar()
-
-
-                    return _self
-                }, //play
+                    return _player
+                },
 
 
                 /*
@@ -593,23 +410,9 @@
                 pause: function() {
 
                     // pause the song
-                    _self.audioPlayer.pause()
+                    _player.$playerAudio[ 0 ].pause()
 
-                    // show the play button
-                    _self.playerPlay.style.display = ''
-
-                    // hide the pause button
-                    _self.playerPause.style.display = 'none'
-
-                    if ( !_self.audioPlayer.src.length ) {
-
-                        // disable rewind and forward
-                        _self.playerRewind.style.color = 'red'
-                        _self.playerForward.style.color = 'red'
-                    }
-
-                    return _self
-                }, //pause
+                },
 
 
                 /*
@@ -618,17 +421,17 @@
 
                 rewind: function() {
 
-                    // check if it's shorter than the total duration
-                    if ( _self.audioPlayer.currentTime - 5 > 0 ) {
-                        _self.audioPlayer.currentTime -= 5
+                    // check if it's greater than the start position
+                    if ( _player.$playerAudio[ 0 ].currentTime - 5 > 0 ) {
+                        _player.$playerAudio[ 0 ].currentTime -= 5
                     }
 
-                    // otherwise pause and then rewind
+                    // otherwise rewind to start
                     else {
-                        _self.audioPlayer.currentTime = 0
+                        _player.$playerAudio[ 0 ].currentTime = 0
                     }
 
-                    return _self
+                    return _player
                 },
 
 
@@ -638,47 +441,22 @@
 
                 forward: function() {
 
-                    // check if it's shorter than the total duration
-                    if ( _self.audioPlayer.currentTime + 6 < _self.audioPlayer.duration ) {
-                        _self.audioPlayer.currentTime += 5
+                    // check if it's less than the total duration
+                    if ( _player.$playerAudio[ 0 ].currentTime + 5 < _player.$playerAudio[ 0 ].duration ) {
+                        _player.$playerAudio[ 0 ].currentTime += 5
                     }
 
-                    // otherwise pause and then rewind
+                    // otherwise forward to the end
                     else {
-                        _self.pause()
-                        _self.audioPlayer.currentTime = 0
+                        _player.$playerAudio[ 0 ].currentTime = _player.$playerAudio[ 0 ].duration
                     }
 
-
-                    return _self
-                },
-
-
-                /*
-                    Play or pause a song
-                ======================================================================== */
-
-                playOrPause: function( button ) {
-
-                    console.log( button.dataset.control )
-
-                    if ( !_self.audioPlayer.src.length ) {
-
-                        console.log( 'play the first song' )
-
-                        return _self
-                    }
-
-
-                    if ( _self[ button.dataset.control ] ) {
-                        _self[ button.dataset.control ]()
-                    }
-
-                    return _self
+                    return _player
                 }
 
 
-            } //_self
+
+            }, //_player
 
 
 
@@ -686,19 +464,85 @@
                 Public methods
             ======================================================================== */
 
-            function MusicPlayer( playlists ) {
-                return new _self.init( playlists )
+            player = {
+
+            } //player
+
+
+
+        /*
+            Initialize and return
+        ======================================================================== */
+
+        _player.init()
+
+
+        // return the player methods
+        return player
+    } //MusicPlayer
+
+
+
+
+
+    /*
+        Extend jQuery
+    ======================================================================== */
+
+    $.fn.musicPlayer = function( options ) {
+        return this.each( function() {
+
+            if ( !$.data( this, 'music-player' )) {
+
+                $.data(
+                    this,
+                    'music-player',
+                    new MusicPlayer( this, options )
+                )
             }
 
-
-            return new MusicPlayer( playlists )
-        } //PLAYER
-
-
-
-        window.music = PLAYER( document.getElementsByClassName( CLASSNAME_PLAYLIST ) )
+            return this
+        })
+    }
 
 
+
+
+    /*
+        Default options
+    ======================================================================== */
+
+    $.fn.musicPlayer.options = {
+
+        // classes
+        classAudioWrapper: 'wrapper-audio',
+
+        classPlayer: 'music-player',
+        classPlayerWrapper: 'wrapper-player',
+
+        classControls: 'controls-player',
+        classControlsPlay: 'control-play',
+        classControlsPause: 'control-pause',
+        classControlsRewind: 'control-rewind',
+        classControlsForward: 'control-forward',
+        classControlsWrapper: 'wrapper-controls',
+
+        classSeekbar: 'seekbar-bar',
+        classSeekbarProgress: 'seekbar-progress',
+        classSeekbarPointer: 'seekbar-pointer',
+        classSeekbarWrapper: 'wrapper-seekbar',
+
+        classTimestampStart: 'timestamp-start',
+        classTimestampEnd: 'timestamp-end',
+        classTimestampWrapper: 'wrapper-timestamps',
+
+
+        // strings
+        stringPlay: 'Play',
+        stringPause: 'Pause',
+        stringRewind: 'Rewind',
+        stringForward: 'Forward'
+    }
 
 
 /* */
