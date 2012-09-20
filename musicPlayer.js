@@ -1,5 +1,5 @@
 /*!
-    musicPlayer.js v0.3.0
+    musicPlayer.js v0.3.2
     By Amsul (http://amsul.ca)
 
     Updated: 20 September, 2012
@@ -26,12 +26,13 @@
                 Globals
             ======================================================================== */
 
-            // options
+            // merged options
             OPTIONS = $.extend( {}, $.fn.musicPlayer.options, options ),
 
 
             // elements
-            $PLAYLIST = $( playlist ),
+            PLAYLIST = playlist,
+            $PLAYLIST = $( PLAYLIST ),
 
 
             // classes
@@ -129,6 +130,7 @@
 
                                                             // bind the events
                                                             on({
+                                                                'playing.firstplay': _player.onFirstplay,
                                                                 playing: _player.onPlaying,
                                                                 pause: _player.onPause,
                                                                 timeupdate: _player.onTimeupdate,
@@ -184,16 +186,17 @@
                 createSeeker: function() {
 
                     // create the seekbar
-                    _player.$playerSeekbar          =       $( '<a class="' + CLASSNAME_SEEKBAR_BAR + '" style="display:block;height:20px;background:lightgrey"></a>' ).
-                                                                on( 'click', _player.onClickSeekbar )
+                    _player.$playerSeekbar          =       $( '<div class="' + CLASSNAME_SEEKBAR_BAR + '" style="display:block;height:20px;background:lightgrey"></div>' )
 
                     // create the seekbar progress
-                    _player.$playerSeekbarProgress  =       $( '<a class="' + CLASSNAME_SEEKBAR_PROGRESS + '" style="position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0;background:red"></a>' ).
-                                                                on( 'click', _player.onClickSeekbarProgress )
+                    _player.$playerSeekbarProgress  =       $( '<div class="' + CLASSNAME_SEEKBAR_PROGRESS + '" style="position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0;background:red"></div>' )
+
+                    // create the seekbar controller
+                    _player.$playerSeekbarController =      $( '<a style="position:absolute;z-index:20;left:0;top:0;right:0;bottom:0"></a>' )
 
                     // create the seekbar wrapper
                     _player.$playerSeekbarWrapper   =       $( '<div class="' + CLASSNAME_WRAPPER_SEEKBAR + '" style="position:relative" />' ).
-                                                                append( _player.$playerSeekbar, _player.$playerSeekbarProgress )
+                                                                append( _player.$playerSeekbar, _player.$playerSeekbarProgress, _player.$playerSeekbarController )
 
                     return _player.$playerSeekbarWrapper
                 }, //createSeeker
@@ -206,10 +209,10 @@
                 createTimestamps: function() {
 
                     // create the start stamp
-                    _player.$playerTimestampsStart   =      $( '<div class="' + CLASSNAME_TIMESTAMPS_START + '" />' )
+                    _player.$playerTimestampsStart   =      $( '<div class="' + CLASSNAME_TIMESTAMPS_START + '" style="color:red" />' )
 
                     // create the end stamp
-                    _player.$playerTimestampsEnd     =      $( '<div class="' + CLASSNAME_TIMESTAMPS_END + '" />' )
+                    _player.$playerTimestampsEnd     =      $( '<div class="' + CLASSNAME_TIMESTAMPS_END + '" style="color:red" />' )
 
                     // create the timestamp wrapper
                     _player.$playerTimestampsWrapper =      $( '<div class="' + CLASSNAME_WRAPPER_TIMESTAMPS + '" />' ).
@@ -233,6 +236,23 @@
                     Fire the audio player events
                 ======================================================================== */
 
+                onFirstplay: function( event ) {
+
+                    // enable rewind and foward
+                    _player.$playerRewind.css( 'color', '' )
+                    _player.$playerForward.css( 'color', '' )
+
+                    // enable the timestamps
+                    _player.$playerTimestampsStart.css( 'color', '' )
+                    _player.$playerTimestampsEnd.css( 'color', '' )
+
+                    // bind click events to the seekbar
+                    _player.$playerSeekbarController.on( 'click', _player.onClickSeekbar )
+
+                    // switch off the listener
+                    _player.$playerAudio.off( '.firstplay' )
+                },
+
                 onPlaying: function( event ) {
 
                     // hide the play button
@@ -240,13 +260,6 @@
 
                     // show the pause button
                     _player.$playerPause.show()
-
-                    // enable rewind and foward
-                    _player.$playerRewind.css( 'color', '' )
-                    _player.$playerForward.css( 'color', '' )
-
-                    // trigger a seekbar time update
-                    //.........?
                 },
 
                 onPause: function( event ) {
@@ -288,14 +301,10 @@
 
 
                 /*
-                    Fire the seekbar events
+                    Fire the seekbar click event
                 ======================================================================== */
 
                 onClickSeekbar: function( event ) {
-                    _player.$playerAudio[ 0 ].currentTime = event.offsetX / _player.$playerSeekbar[ 0 ].offsetWidth * _player.$playerAudio[ 0 ].duration
-                },
-
-                onClickSeekbarProgress: function( event ) {
                     _player.$playerAudio[ 0 ].currentTime = event.offsetX / _player.$playerSeekbar[ 0 ].offsetWidth * _player.$playerAudio[ 0 ].duration
                 },
 
