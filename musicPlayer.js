@@ -1,8 +1,8 @@
 /*!
-    musicPlayer.js v0.3.8
+    musicPlayer.js v0.4.0
     By Amsul (http://amsul.ca)
 
-    Updated: 20 September, 2012
+    Updated: 21 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -35,6 +35,10 @@
             $PLAYLIST = $( PLAYLIST ),
             $PLAYLIST_SONGS = $PLAYLIST.find( '[data-song]' ),
 
+            $PLAYER_CONTAINER = $( OPTIONS.placeInto ),
+
+            $SONG_PLAYING,
+
             PLAYER_AUDIO,
             $PLAYER_AUDIO,
 
@@ -51,37 +55,11 @@
             $TIMESTAMP_END,
 
 
-            // classes
-            CLASSNAME_CONTROLS = OPTIONS.classControls,
-            CLASSNAME_CONTROLS_PLAY = OPTIONS.classControlsPlay,
-            CLASSNAME_CONTROLS_PAUSE = OPTIONS.classControlsPause,
-            CLASSNAME_CONTROLS_REWIND = OPTIONS.classControlsRewind,
-            CLASSNAME_CONTROLS_FORWARD = OPTIONS.classControlsForward,
-
-            CLASSNAME_SEEKBAR_BAR = OPTIONS.classSeekbar,
-            CLASSNAME_SEEKBAR_PROGRESS = OPTIONS.classSeekbarProgress,
-            CLASSNAME_SEEKBAR_POINTER = OPTIONS.classSeekbarPointer,
-
-            CLASSNAME_TIMESTAMPS_START = OPTIONS.classTimestampStart,
-            CLASSNAME_TIMESTAMPS_END = OPTIONS.classTimestampEnd,
-
-            CLASSNAME_WRAPPER_AUDIO = OPTIONS.classAudioWrapper,
-            CLASSNAME_WRAPPER_PLAYER = OPTIONS.classPlayerWrapper,
-            CLASSNAME_WRAPPER_CONTROLS = OPTIONS.classControlsWrapper,
-            CLASSNAME_WRAPPER_SEEKBAR = OPTIONS.classSeekbarWrapper,
-            CLASSNAME_WRAPPER_TIMESTAMPS = OPTIONS.classTimestampWrapper,
-
-
             // strings
-            STRING_PLAY = OPTIONS.stringPlay,
-            STRING_PAUSE = OPTIONS.stringPause,
-            STRING_REWIND = OPTIONS.stringRewind,
-            STRING_FORWARD = OPTIONS.stringForward,
-
             STRING_TIME_CURRENT = 'Current time',
             STRING_TIME_TOTAL = 'Total duration',
 
-            STRING_AUDIO_TYPE = 'audio/mp3',
+            STRING_AUDIO_TYPE = 'audio/' + OPTIONS.audioType,
 
 
             // numbers
@@ -107,25 +85,32 @@
                         // create an audio player
                         $wrappedAudio = _player.createAudio(),
 
-                        // create player controls
-                        $wrappedControls = _player.createControls(),
-
                         // create player seeker
                         $wrapperSeeker = _player.createSeeker(),
+
+                        // create player controls
+                        $wrappedControls = _player.createControls(),
 
                         // create the time stamps
                         $wrappedTimestamps = _player.createTimestamps(),
 
                         // create a wrapper for the player
-                        $wrapper = $( '<section class="' + CLASSNAME_WRAPPER_PLAYER + '" />' )
+                        $wrapper = $( '<section class="' + OPTIONS.classPlayerWrapper + '" />' )
 
 
                     // add the stuff to the wrapper
-                    $wrapper.append( $wrappedAudio, $wrappedControls, $wrapperSeeker, $wrappedTimestamps )
+                    $wrapper.append( $wrappedAudio, $wrapperSeeker, $wrappedControls, $wrappedTimestamps )
 
 
-                    // put the player in the dom
-                    $PLAYLIST.after( $wrapper )
+                    // put the player in the container
+                    if ( OPTIONS.placeInto && $PLAYER_CONTAINER.length ) {
+                        $PLAYER_CONTAINER.html( $wrapper )
+                    }
+
+                    // otherwise right after the playlist
+                    else {
+                        $PLAYLIST.after( $wrapper )
+                    }
 
 
                     // bind the songs click event
@@ -158,7 +143,7 @@
                                                     html( '<source type="' + STRING_AUDIO_TYPE + '" />' ).
 
                                                     // wrap the audio player
-                                                    wrap( '<div class="' + CLASSNAME_WRAPPER_AUDIO + '" style="display:none">' )
+                                                    wrap( '<div class="' + OPTIONS.classAudioWrapper + '" style="display:none">' )
 
                     PLAYER_AUDIO = $PLAYER_AUDIO[ 0 ]
 
@@ -175,33 +160,33 @@
                     // create the play button
                     $PLAYER_PLAY        =       createElement( 'a', {
                                                     'data-control': 'play',
-                                                    'class': CLASSNAME_CONTROLS_PLAY
-                                                }, STRING_PLAY ).
+                                                    'class': OPTIONS.classControlsPlay
+                                                }, OPTIONS.stringPlay ).
                                                 on( 'click.controller', _player.onClickControl )
 
                     // create the pause button
                     $PLAYER_PAUSE       =       createElement( 'a', {
                                                     'data-control': 'pause',
-                                                    'class': CLASSNAME_CONTROLS_PAUSE,
+                                                    'class': OPTIONS.classControlsPause,
                                                     'style': 'display:none'
-                                                }, STRING_PAUSE )
+                                                }, OPTIONS.stringPause )
 
                     // create the rewind button
                     $PLAYER_REWIND      =       createElement( 'a', {
                                                     'data-control': 'rewind',
-                                                    'class': CLASSNAME_CONTROLS_REWIND,
+                                                    'class': OPTIONS.classControlsRewind,
                                                     'style': 'color:red'
-                                                }, STRING_REWIND )
+                                                }, OPTIONS.stringRewind )
 
                     // create the forward button
                     $PLAYER_FORWARD     =       createElement( 'a', {
                                                     'data-control': 'forward',
-                                                    'class': CLASSNAME_CONTROLS_FORWARD,
+                                                    'class': OPTIONS.classControlsForward,
                                                     'style': 'color:red'
-                                                }, STRING_FORWARD )
+                                                }, OPTIONS.stringForward )
 
                     // return the wrapped controls
-                    return $( '<div class="' + CLASSNAME_WRAPPER_CONTROLS + '" />' ).append( $PLAYER_PLAY, $PLAYER_PAUSE, $PLAYER_REWIND, $PLAYER_FORWARD )
+                    return $( '<div class="' + OPTIONS.classControlsWrapper + '" />' ).append( $PLAYER_REWIND, $PLAYER_PLAY, $PLAYER_PAUSE, $PLAYER_FORWARD )
                 }, //createControls
 
 
@@ -213,24 +198,24 @@
 
                     // create the seekbar
                     $SEEKER_BAR         =       createElement( 'div', {
-                                                    'class': CLASSNAME_SEEKBAR_BAR,
-                                                    'style': 'display:block;height:20px;background:lightgrey'
+                                                    'class': OPTIONS.classSeekbar,
+                                                    'style': 'display:block;min-height:3px;background:lightgrey'
                                                 })
 
                     // create the seekbar progress
                     $SEEKER_PROGRESS    =       createElement( 'div', {
-                                                    'class': CLASSNAME_SEEKBAR_PROGRESS,
+                                                    'class': OPTIONS.classSeekbarProgress,
                                                     'style': 'position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0;background:red'
                                                 })
 
                     // create the seekbar controller
                     $SEEKER_CONTROLLER  =       createElement( 'a', {
-                                                    'class': CLASSNAME_SEEKBAR_PROGRESS,
+                                                    'class': OPTIONS.classSeekbarController,
                                                     'style': 'position:absolute;z-index:20;left:0;top:0;right:0;bottom:0'
                                                 })
 
                     // return the wrapped seekbar
-                    return $( '<div class="' + CLASSNAME_WRAPPER_SEEKBAR + '" style="position:relative" />' ).append( $SEEKER_BAR, $SEEKER_PROGRESS, $SEEKER_CONTROLLER )
+                    return $( '<div class="' + OPTIONS.classSeekbarWrapper + '" style="position:relative" />' ).append( $SEEKER_BAR, $SEEKER_PROGRESS, $SEEKER_CONTROLLER )
                 }, //createSeeker
 
 
@@ -242,13 +227,13 @@
 
                     // create the start stamp
                     $TIMESTAMP_START    =       createElement( 'div', {
-                                                    'class': CLASSNAME_TIMESTAMPS_START,
+                                                    'class': OPTIONS.classTimestampStart,
                                                     'style': 'color:red'
                                                 })
 
                     // create the end stamp
                     $TIMESTAMP_END      =       createElement( 'div', {
-                                                    'class': CLASSNAME_TIMESTAMPS_END,
+                                                    'class': OPTIONS.classTimestampEnd,
                                                     'style': 'color:red'
                                                 })
 
@@ -260,7 +245,7 @@
 
 
                     // return the wrapped timestamp
-                    return $( '<div class="' + CLASSNAME_WRAPPER_TIMESTAMPS + '" />' ).append( $TIMESTAMP_START, $TIMESTAMP_END )
+                    return $( '<div class="' + OPTIONS.classTimestampWrapper + '" />' ).append( $TIMESTAMP_START, $TIMESTAMP_END )
                 }, //createTimestamps
 
 
@@ -349,27 +334,6 @@
 
 
                 /*
-                    Set the player timestamps
-                ======================================================================== */
-
-                setTimestampStart: function( time ) {
-
-                    // set the text
-                    $TIMESTAMP_START.text( formatTime( time ) )
-
-                    return _player
-                },
-
-                setTimestampEnd: function( time ) {
-
-                    // set the text
-                    $TIMESTAMP_END.text( formatTime( time ) )
-
-                    return _player
-                },
-
-
-                /*
                     Handle the player control events
                 ======================================================================== */
 
@@ -409,12 +373,87 @@
 
                 onClickSong: function( event ) {
 
+                    var $song = $( event.target )
+
                     // prevent the default event action
                     event.preventDefault()
 
-                    // play the song
-                    _player.play( event.target.dataset.song )
+
+                    _player.
+
+                        // play the song
+                        play( $song[ 0 ].dataset.song ).
+
+                        // set this song as playing
+                        setSongPlaying( $song )
                 },
+
+
+
+                /*
+                    Set the player timestamps
+                ======================================================================== */
+
+                setTimestampStart: function( time ) {
+
+                    // set the text
+                    $TIMESTAMP_START.text( formatTime( time ) )
+
+                    return _player
+                },
+
+                setTimestampEnd: function( time ) {
+
+                    // set the text
+                    $TIMESTAMP_END.text( formatTime( time ) )
+
+                    return _player
+                },
+
+
+                /*
+                    Set a song as playing
+                ======================================================================== */
+
+                setSongPlaying: function( $song ) {
+
+                    // if a song is already playing
+                    if ( $SONG_PLAYING && $SONG_PLAYING.length ) {
+
+                        // clear the previous song state
+                        _player.setSongStopped( $SONG_PLAYING )
+                    }
+
+                    // set the new song state
+                    $SONG_PLAYING   =       $song.
+
+                                                // add the playing class
+                                                addClass( OPTIONS.classSongPlaying ).
+
+                                                // add the playing tag
+                                                append( '<small class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongPlaying + '</small>' )
+
+                    return _player
+                },
+
+
+                /*
+                    Set a song as stopped
+                ======================================================================== */
+
+                setSongStopped: function( $song ) {
+
+                    $song.
+
+                        // remove the playing class
+                        removeClass( OPTIONS.classSongPlaying ).
+
+                        // remove the playing tag
+                        find( '.' + OPTIONS.classSongPlayingTag ).remove()
+
+                    return _player
+                },
+
 
 
                 /*
@@ -439,7 +478,7 @@
                     }
 
                     // otherwise, play the first song
-                    _player.play( $PLAYLIST_SONGS[ 0 ].dataset.song )
+                    $PLAYLIST_SONGS.first().trigger( 'click' )
 
                     return _player
                 }, //play
@@ -592,13 +631,19 @@
 
     $.fn.musicPlayer.options = {
 
+        // player options
+        audioType: 'mp3',
+
+
         // classes
         classAudioWrapper: 'wrapper-audio',
+
+        classSongPlaying: 'song-playing',
+        classSongPlayingTag: 'song-playing-tag',
 
         classPlayer: 'music-player',
         classPlayerWrapper: 'wrapper-player',
 
-        classControls: 'controls-player',
         classControlsPlay: 'control-play',
         classControlsPause: 'control-pause',
         classControlsRewind: 'control-rewind',
@@ -607,6 +652,7 @@
 
         classSeekbar: 'seekbar-bar',
         classSeekbarProgress: 'seekbar-progress',
+        classSeekbarController: 'seekbar-controller',
         classSeekbarPointer: 'seekbar-pointer',
         classSeekbarWrapper: 'wrapper-seekbar',
 
@@ -619,7 +665,14 @@
         stringPlay: 'Play',
         stringPause: 'Pause',
         stringRewind: 'Rewind',
-        stringForward: 'Forward'
+        stringForward: 'Forward',
+
+        stringSongPlaying: 'Playing now',
+        stringSongPaused: 'Paused',
+
+
+        // elements
+        placeInto: null
     }
 
 
