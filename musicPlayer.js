@@ -1,8 +1,8 @@
 /*!
-    musicPlayer.js v0.4.0
+    musicPlayer.js v0.4.4
     By Amsul (http://amsul.ca)
 
-    Updated: 21 September, 2012
+    Updated: 22 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -309,6 +309,9 @@
 
                     // show the play button
                     $PLAYER_PLAY.show()
+
+                    // set the pause status
+                    _player.setSongPaused()
                 },
 
                 onTimeupdate: function( event ) {
@@ -418,7 +421,7 @@
 
                     var $song = $( event.delegateTarget )
 
-                    console.log( 'click', event, $song[0] )
+                    console.log( 'click', event )
 
                     // prevent the default event action
                     event.preventDefault()
@@ -478,7 +481,7 @@
                                                 addClass( OPTIONS.classSongPlaying ).
 
                                                 // add the playing tag
-                                                append( '<small class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongLoading + '</small>' )
+                                                prepend( '<small data-tag="playing" class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongLoading + '</small>' )
 
                     return _player
                 },
@@ -495,8 +498,26 @@
                     }
 
                     $song.
-                        find( '.' + OPTIONS.classSongPlayingTag ).
-                        text( OPTIONS.stringSongPlaying )
+                        find( '[data-tag]' ).
+                        html( OPTIONS.stringSongPlaying )
+
+                    return _player
+                },
+
+
+                /*
+                    Set a song as paused
+                ======================================================================== */
+
+                setSongPaused: function( $song ) {
+
+                    if ( !$song ) {
+                        $song = $SONG_PLAYING
+                    }
+
+                    $song.
+                        find( '[data-tag]' ).
+                        html( OPTIONS.stringSongPaused )
 
                     return _player
                 },
@@ -518,7 +539,7 @@
                         removeClass( OPTIONS.classSongPlaying ).
 
                         // remove the playing tag
-                        find( '.' + OPTIONS.classSongPlayingTag ).remove()
+                        find( '[data-tag]' ).remove()
 
                     return _player
                 },
