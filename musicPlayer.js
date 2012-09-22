@@ -74,6 +74,9 @@
 
             _player = {
 
+                // for caching
+                cache: {},
+
 
                 /*
                     Initialize the player
@@ -104,12 +107,22 @@
 
                     // put the player in the container
                     if ( OPTIONS.placeInto && $PLAYER_CONTAINER.length ) {
+
+                        // insert into dom
                         $PLAYER_CONTAINER.html( $wrapper )
+
+                        // quick reference for the <audio> elem
+                        PLAYER_AUDIO = $PLAYER_CONTAINER.find( 'audio' )[ 0 ]
                     }
 
-                    // otherwise right after the playlist
+                    // otherwise
                     else {
+
+                        // place after playlist
                         $PLAYLIST.after( $wrapper )
+
+                        // quick reference for the <audio> elem
+                        PLAYER_AUDIO = $PLAYLIST.next().find( 'audio' )[ 0 ]
                     }
 
 
@@ -135,6 +148,8 @@
                                                         pause: _player.onPause,
                                                         timeupdate: _player.onTimeupdate,
                                                         loadedmetadata: _player.onLoadedmetadata,
+                                                        durationchange: _player.onDurationchange,
+                                                        emptied: _player.onEmptied,
                                                         ended: _player.onEnded,
                                                         error: _player.onError
                                                     }).
@@ -144,8 +159,6 @@
 
                                                     // wrap the audio player
                                                     wrap( '<div class="' + OPTIONS.classAudioWrapper + '" style="display:none">' )
-
-                    PLAYER_AUDIO = $PLAYER_AUDIO[ 0 ]
 
                     return $PLAYER_AUDIO.parent()
                 }, //createAudio
@@ -175,14 +188,14 @@
                     $PLAYER_REWIND      =       createElement( 'a', {
                                                     'data-control': 'rewind',
                                                     'class': OPTIONS.classControlsRewind,
-                                                    'style': 'color:red'
+                                                    'style': 'color:lightgrey'
                                                 }, OPTIONS.stringRewind )
 
                     // create the forward button
                     $PLAYER_FORWARD     =       createElement( 'a', {
                                                     'data-control': 'forward',
                                                     'class': OPTIONS.classControlsForward,
-                                                    'style': 'color:red'
+                                                    'style': 'color:lightgrey'
                                                 }, OPTIONS.stringForward )
 
                     // return the wrapped controls
@@ -199,13 +212,13 @@
                     // create the seekbar
                     $SEEKER_BAR         =       createElement( 'div', {
                                                     'class': OPTIONS.classSeekbar,
-                                                    'style': 'display:block;min-height:3px;background:lightgrey'
+                                                    'style': 'display:block;min-height:3px' + ( ( OPTIONS.colorSeekbar ) ? ';background:' + OPTIONS.colorSeekbar : '' )
                                                 })
 
                     // create the seekbar progress
                     $SEEKER_PROGRESS    =       createElement( 'div', {
                                                     'class': OPTIONS.classSeekbarProgress,
-                                                    'style': 'position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0;background:red'
+                                                    'style': 'position:absolute;z-index:10;left:0;top:0;right:100%;bottom:0' + ( ( OPTIONS.colorSeekbarProgress ) ? ';background:' + OPTIONS.colorSeekbarProgress : '' )
                                                 })
 
                     // create the seekbar controller
@@ -228,13 +241,13 @@
                     // create the start stamp
                     $TIMESTAMP_START    =       createElement( 'div', {
                                                     'class': OPTIONS.classTimestampStart,
-                                                    'style': 'color:red'
+                                                    'style': 'color:lightgrey'
                                                 })
 
                     // create the end stamp
                     $TIMESTAMP_END      =       createElement( 'div', {
                                                     'class': OPTIONS.classTimestampEnd,
-                                                    'style': 'color:red'
+                                                    'style': 'color:lightgrey'
                                                 })
 
                     // set the current time
@@ -257,6 +270,8 @@
 
                 onFirstplay: function( event ) {
 
+                    console.log( 'first play', $PLAYER_REWIND )
+
                     // enable rewind and foward
                     $PLAYER_REWIND.css( 'color', '' ).on( 'click.controller', _player.onClickControl )
                     $PLAYER_FORWARD.css( 'color', '' ).on( 'click.controller', _player.onClickControl )
@@ -269,7 +284,7 @@
                     $TIMESTAMP_END.css( 'color', '' )
 
                     // bind click events to the seekbar
-                    $SEEKER_CONTROLLER.on( 'click.seekbar', _player.onClickSeekbar )
+                    $SEEKER_CONTROLLER.on( 'click.seekcontroller', _player.onClickSeekbar )
 
                     // switch off the listener
                     $PLAYER_AUDIO.off( '.firstplay' )
@@ -282,6 +297,9 @@
 
                     // show the pause button
                     $PLAYER_PAUSE.show()
+
+                    // set the play status
+                    _player.setSongPlaying()
                 },
 
                 onPause: function( event ) {
@@ -311,7 +329,24 @@
                     _player.setTimestampEnd( event.target.duration )
                 },
 
+                onDurationchange: function( event ) {
+
+                    // if there's a change in duration
+                    if ( event.target.duration !== _player.cache.playerDuration ) {
+
+                        // update the end timestamp
+                        _player.setTimestampEnd( event.target.duration )
+
+                        // re measure the seekbar click position with duration
+                        $SEEKER_CONTROLLER.
+                            off( '.seekcontroller' ).
+                            on( 'click.seekcontroller', _player.onClickSeekbar )
+                    }
+                },
+
                 onEnded: function( event ) {
+
+                    _player.setSongStopped()
 
                     // update the status when a song ends
                     console.log( 'song ended', event )
@@ -321,6 +356,14 @@
 
                     // notify when there is an error
                     console.log( 'there was an error loading the song', event )
+                },
+
+                onEmptied: function( event ) {
+
+                    // update the timestamps to zero
+                    _player.
+                        setTimestampStart( 0 ).
+                        setTimestampEnd( 0 )
                 },
 
 
@@ -373,11 +416,12 @@
 
                 onClickSong: function( event ) {
 
-                    var $song = $( event.target )
+                    var $song = $( event.delegateTarget )
+
+                    console.log( 'click', event, $song[0] )
 
                     // prevent the default event action
                     event.preventDefault()
-
 
                     _player.
 
@@ -385,7 +429,7 @@
                         play( $song[ 0 ].dataset.song ).
 
                         // set this song as playing
-                        setSongPlaying( $song )
+                        setSongLoading( $song )
                 },
 
 
@@ -407,15 +451,18 @@
                     // set the text
                     $TIMESTAMP_END.text( formatTime( time ) )
 
+                    // cache the duration
+                    _player.cache.playerDuration = time
+
                     return _player
                 },
 
 
                 /*
-                    Set a song as playing
+                    Set a song as loading
                 ======================================================================== */
 
-                setSongPlaying: function( $song ) {
+                setSongLoading: function( $song ) {
 
                     // if a song is already playing
                     if ( $SONG_PLAYING && $SONG_PLAYING.length ) {
@@ -431,7 +478,25 @@
                                                 addClass( OPTIONS.classSongPlaying ).
 
                                                 // add the playing tag
-                                                append( '<small class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongPlaying + '</small>' )
+                                                append( '<small class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongLoading + '</small>' )
+
+                    return _player
+                },
+
+
+                /*
+                    Set a song as playing
+                ======================================================================== */
+
+                setSongPlaying: function( $song ) {
+
+                    if ( !$song ) {
+                        $song = $SONG_PLAYING
+                    }
+
+                    $song.
+                        find( '.' + OPTIONS.classSongPlayingTag ).
+                        text( OPTIONS.stringSongPlaying )
 
                     return _player
                 },
@@ -442,6 +507,10 @@
                 ======================================================================== */
 
                 setSongStopped: function( $song ) {
+
+                    if ( !$song ) {
+                        $song = $SONG_PLAYING
+                    }
 
                     $song.
 
@@ -467,12 +536,17 @@
 
                         console.log( source )
 
+                        // reset the player
+                        PLAYER_AUDIO.load()
+
                         // set the source
                         PLAYER_AUDIO.src = source
                     }
 
-                    // play the source
+                    // if there's a source on the player
                     if ( PLAYER_AUDIO.src ) {
+
+                        // play the source
                         PLAYER_AUDIO.play()
                         return _player
                     }
@@ -501,6 +575,8 @@
 
                 rewind: function() {
 
+                    console.log( 'rewinding' )
+
                     // check if it's greater than the start position
                     if ( PLAYER_AUDIO.currentTime - 5 > 0 ) {
                         PLAYER_AUDIO.currentTime -= 5
@@ -518,6 +594,8 @@
                 ======================================================================== */
 
                 forward: function() {
+
+                    console.log( 'forwarding' )
 
                     // check if it's less than the total duration
                     if ( PLAYER_AUDIO.currentTime + 5 < PLAYER_AUDIO.duration ) {
@@ -667,8 +745,14 @@
         stringRewind: 'Rewind',
         stringForward: 'Forward',
 
+        stringSongLoading: 'Loading...',
         stringSongPlaying: 'Playing now',
         stringSongPaused: 'Paused',
+
+
+        // colors
+        colorSeekbar: 'lightgrey',
+        colorSeekbarProgress: 'red',
 
 
         // elements
