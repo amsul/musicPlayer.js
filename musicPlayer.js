@@ -1,14 +1,20 @@
 /*!
-    musicPlayer.js v0.4.4
+    musicPlayer.js v0.4.6
     By Amsul (http://amsul.ca)
 
-    Updated: 22 September, 2012
+    Updated: 23 October, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
-    Hosted on http://github.com/amsul/slideshow
-*/
-/*jshint browser: true, devel: true, debug: true */
+    Hosted on http://github.com/amsul/musicPlayer.js
+ */
+
+/*jshint
+    browser: true,
+    devel: true,
+    debug: true,
+    asi: true
+ */
 
 
 /* */
@@ -419,19 +425,28 @@
 
                 onClickSong: function( event ) {
 
-                    var $song = $( event.delegateTarget )
+                    var
+                        song = event.delegateTarget,
+                        $song = $( song )
 
                     console.log( 'click', event )
 
                     // prevent the default event action
                     event.preventDefault()
 
+
+                    // if the song is already playing, just return it
+                    if ( $SONG_PLAYING && $SONG_PLAYING._songId === song.dataset.action.id ) {
+                        return
+                    }
+
+
                     _player.
 
                         // play the song
-                        play( $song[ 0 ].dataset.song ).
+                        play( song.dataset.song ).
 
-                        // set this song as playing
+                        // set this song as loading
                         setSongLoading( $song )
                 },
 
@@ -482,6 +497,8 @@
 
                                                 // add the playing tag
                                                 prepend( '<small data-tag="playing" class="' + OPTIONS.classSongPlayingTag + '">' + OPTIONS.stringSongLoading + '</small>' )
+
+                    $SONG_PLAYING._songId = $song[ 0 ].dataset.action.id
 
                     return _player
                 },
